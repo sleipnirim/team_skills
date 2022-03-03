@@ -15,4 +15,15 @@ class Skill {
 }
 
 @JsonEnum()
-enum SkillType { programmingLang, technology, responsibleSystem, hobby }
+enum SkillType { programmingLang, responsibleSystem }
+
+extension SkillTypeExtention on SkillType {
+  String get value {
+    switch (this) {
+      case SkillType.programmingLang:
+        return 'Programming Languages';
+      case SkillType.responsibleSystem:
+        return 'Responsible for systems';
+    }
+  }
+}

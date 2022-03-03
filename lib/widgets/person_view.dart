@@ -86,7 +86,7 @@ class _PersonViewState extends State<PersonView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  sortedTypes.elementAt(index).name,
+                                  sortedTypes.elementAt(index).value,
                                   textAlign: TextAlign.left,
                                 ),
                                 ListView.builder(

@@ -32,7 +32,7 @@ class ChipsRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(type.name),
+        Text(type.value),
         Row(
           children: [
             Row(

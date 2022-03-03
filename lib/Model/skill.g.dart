@@ -18,7 +18,5 @@ Map<String, dynamic> _$SkillToJson(Skill instance) => <String, dynamic>{
 
 const _$SkillTypeEnumMap = {
   SkillType.programmingLang: 'programmingLang',
-  SkillType.technology: 'technology',
   SkillType.responsibleSystem: 'responsibleSystem',
-  SkillType.hobby: 'hobby',
 };
