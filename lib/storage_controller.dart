@@ -39,13 +39,10 @@ class StorageController {
     return querySnapshot.docs[0].data();
   }
 
-  List<Skill> getSkillsByUids(List<String> uids) {
+  Future<List<Skill>> getSkillsByUids(List<String> uids) async {
     var skillsList = <Skill>[];
     if (uids.isNotEmpty) {
-      skills
-          .where('uid', whereIn: uids)
-          .get()
-          .then((value) => value.docs.map((e) => skills.add(e.data())));
+      var snapshot = await skills.where('id', whereIn: uids).get();
     }
     return skillsList;
   }
@@ -78,7 +75,7 @@ class StorageController {
   Future<void> updatePerson(Person person) async {
     var querySnapshot = await persons.where('uid', isEqualTo: person.uid).get();
     var personID = querySnapshot.docs[0].id;
-    persons.doc(personID).update(person.toJson());
+    await persons.doc(personID).update(person.toJson());
   }
 
   Future<Skill> getSkillByUid(String uid) async {

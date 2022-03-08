@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:team_skills/Model/person.dart';
 import 'package:team_skills/shared_functions.dart';
 import 'package:team_skills/storage_controller.dart';
@@ -50,13 +51,17 @@ class PersonScreen extends StatelessWidget {
           builder: (BuildContext context,
               AsyncSnapshot<QuerySnapshot<Person>> snapshot) {
             if (snapshot.hasData) {
-              return GridView.count(
-                crossAxisCount: 3,
-                children: snapshot.data!.docs
-                    .map((e) => PersonView(
-                          person: e.data(),
-                        ))
-                    .toList(),
+              return MasonryGridView.count(
+                itemCount: snapshot.data!.size,
+                crossAxisCount: MediaQuery.of(context).size.width > 1200
+                    ? 3
+                    : MediaQuery.of(context).size.width > 800
+                        ? 2
+                        : 1,
+                shrinkWrap: true,
+                itemBuilder: (BuildContext context, int index) {
+                  return PersonView(person: snapshot.data!.docs[index].data());
+                },
               );
             } else if (snapshot.hasError) {
               return const Center(

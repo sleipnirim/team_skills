@@ -37,10 +37,10 @@ class _PersonViewState extends State<PersonView> {
       margin: const EdgeInsets.all(30),
       elevation: 20,
       borderOnForeground: true,
-      child: Container(
-        padding: const EdgeInsets.all(20),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Row(
@@ -70,83 +70,90 @@ class _PersonViewState extends State<PersonView> {
                     }
                     var sortedTypes = types.toList();
                     sortedTypes.sort((a, b) => a.index - b.index);
-                    return Expanded(
-                      child: ListView.builder(
-                        itemCount: sortedTypes.length,
-                        itemBuilder: (context, index) {
-                          var singleTypeSkills = Map<Skill, int>.fromEntries(
-                              snapshot.data!.entries.where((element) =>
-                                  element.key.type ==
-                                  sortedTypes.elementAt(index)));
-                          return Container(
-                            padding: const EdgeInsets.all(10),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  sortedTypes.elementAt(index).value,
-                                  textAlign: TextAlign.left,
-                                ),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  //scrollDirection: Axis.vertical,
-                                  itemCount: singleTypeSkills.length,
-                                  itemBuilder: ((context, index) {
-                                    Skill key =
-                                        singleTypeSkills.keys.elementAt(index);
-                                    return Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            key.name,
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: sortedTypes.length,
+                      itemBuilder: (context, index) {
+                        var singleTypeSkills = Map<Skill, int>.fromEntries(
+                            snapshot.data!.entries.where((element) =>
+                                element.key.type ==
+                                sortedTypes.elementAt(index)));
+                        return Container(
+                          padding: const EdgeInsets.all(10),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                sortedTypes.elementAt(index).value,
+                                textAlign: TextAlign.left,
+                              ),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                //scrollDirection: Axis.vertical,
+                                itemCount: singleTypeSkills.length,
+                                itemBuilder: ((context, index) {
+                                  Skill key =
+                                      singleTypeSkills.keys.elementAt(index);
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          key.name,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
                                           ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              likeSaving
-                                                  ? const CircularProgressIndicator()
-                                                  : IconButton(
-                                                      icon: const Icon(
-                                                        Icons.thumb_up,
-                                                        size: 18,
-                                                      ),
-                                                      onPressed: () async {
-                                                        widget.person.skills![
-                                                                await storageController
-                                                                    .getSkillId(
-                                                                        key.name,
-                                                                        key.type)] =
-                                                            singleTypeSkills[
-                                                                    key]! +
-                                                                1;
-                                                        await storageController
-                                                            .updatePerson(
-                                                                widget.person);
-                                                      },
+                                        ),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            likeSaving
+                                                ? const CircularProgressIndicator()
+                                                : IconButton(
+                                                    icon: const Icon(
+                                                      Icons.thumb_up,
                                                     ),
-                                              Text(
-                                                  "  ${singleTypeSkills[key].toString()}"),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                                                    iconSize: 18,
+                                                    splashRadius: 20,
+                                                    constraints:
+                                                        const BoxConstraints(),
+                                                    padding: const EdgeInsets
+                                                        .fromLTRB(5, 10, 5, 10),
+                                                    onPressed: () async {
+                                                      widget.person.skills![
+                                                              await storageController
+                                                                  .getSkillId(
+                                                                      key.name,
+                                                                      key.type)] =
+                                                          singleTypeSkills[
+                                                                  key]! +
+                                                              1;
+                                                      await storageController
+                                                          .updatePerson(
+                                                              widget.person);
+                                                    },
+                                                  ),
+                                            Text(
+                                                "  ${singleTypeSkills[key].toString()}"),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     );
                   }
                 }
