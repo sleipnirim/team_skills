@@ -11,7 +11,8 @@ Person _$PersonFromJson(Map<String, dynamic> json) => Person(
       name: json['name'] as String,
       surname: json['surname'] as String,
       skills: (json['skills'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as int),
+        (k, e) =>
+            MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
       ),
     );
 

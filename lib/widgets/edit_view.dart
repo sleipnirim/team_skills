@@ -134,7 +134,7 @@ class _EditViewState extends State<EditView> {
                         setState(() {
                           skills.add(skill);
                           skillsUids.add(skillUid);
-                          person?.skills?[skillUid] = 0;
+                          person?.skills?[skillUid] = [];
                           chipAddInProgress[type] = false;
                           addChipAreaVisible[type] = false;
                           chipTextEditingController[type]!.clear();
@@ -142,29 +142,22 @@ class _EditViewState extends State<EditView> {
                       },
                       chipAddInProgress: chipAddInProgress[type]!,
                       onPressed: () async {
-                        print('Start');
                         if (!(addChipAreaVisible[type] ?? false)) {
-                          print('in first if');
                           setState(() {
                             addChipAreaVisible[type] = true;
                           });
                         } else {
-                          print('in else');
                           setState(() {
                             chipAddInProgress[type] = true;
                           });
                           var skillUid = await storageController.getSkillId(
                               chipTextEditingController[type]!.text, type);
                           setState(() {
-                            print('in set state');
                             skills.add(Skill(
                                 name: chipTextEditingController[type]!.text,
                                 type: type));
                             skillsUids.add(skillUid);
-                            person?.skills![skillUid] = 0;
-                            for (String id in person!.skills!.keys) {
-                              print(id);
-                            }
+                            person?.skills![skillUid] = [];
                             chipAddInProgress[type] = false;
                             addChipAreaVisible[type] = false;
                             chipTextEditingController[type]!.clear();
@@ -189,7 +182,7 @@ class _EditViewState extends State<EditView> {
                                 uid: authController.auth.currentUser!.uid,
                                 name: nameTextEditingController.text,
                                 surname: surnameTextEditingController.text,
-                                skills: {for (var uid in skillsUids) uid: 0},
+                                skills: {for (var uid in skillsUids) uid: []},
                               ),
                             );
                           }

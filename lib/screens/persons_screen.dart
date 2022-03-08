@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:team_skills/Model/person.dart';
+import 'package:team_skills/auth_controller.dart';
 import 'package:team_skills/shared_functions.dart';
 import 'package:team_skills/storage_controller.dart';
 
@@ -15,6 +16,7 @@ class PersonScreen extends StatelessWidget {
   PersonScreen({Key? key}) : super(key: key);
 
   final storageController = StorageController();
+  final authController = AuthController();
 
   Future<List<Widget>> personGridBuilder() async {
     //final StorageController storageController = StorageController();
@@ -44,7 +46,8 @@ class PersonScreen extends StatelessWidget {
           // Here we take the value from the MyHomePage object that was created by
           // the App.build method, and use it to set our appbar title.
           title: Text(title),
-          actions: SharedFunctions.appBarLoginActions(context),
+          actions: SharedFunctions.appBarLoginActions(
+              context, authController.auth.currentUser!),
         ),
         body: StreamBuilder(
           stream: storageController.persons.snapshots(),

@@ -15,6 +15,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+  await FirebaseAuth.instance.authStateChanges().first;
   runApp(MyApp());
 }
 
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
         LoginScreen.id: (context) => const LoginScreen(),
         RegistrationScreen.id: (context) => const RegistrationScreen(),
         PersonScreen.id: (context) => PersonScreen(),
-        EditScreen.id: (context) => const EditScreen(),
+        EditScreen.id: (context) => EditScreen(),
       },
       home: homeScreenRoute(),
     );

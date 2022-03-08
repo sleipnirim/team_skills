@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:team_skills/Model/like.dart';
 import 'package:team_skills/Model/skill.dart';
 
 import 'Model/person.dart';
@@ -17,6 +18,12 @@ class StorageController {
           fromFirestore: ((snapshot, options) =>
               Skill.fromJson(snapshot.data()!)),
           toFirestore: (skill, _) => skill.toJson());
+
+  CollectionReference<Like> get likes =>
+      _firebaseFirestore.collection('likes').withConverter(
+          fromFirestore: ((snapshot, options) =>
+              Like.fromJson(snapshot.data()!)),
+          toFirestore: (like, _) => like.toJson());
 
   Future<bool> checkIfPersonExists(String uid) async {
     bool userExists = false;
@@ -39,13 +46,13 @@ class StorageController {
     return querySnapshot.docs[0].data();
   }
 
-  Future<List<Skill>> getSkillsByUids(List<String> uids) async {
-    var skillsList = <Skill>[];
-    if (uids.isNotEmpty) {
-      var snapshot = await skills.where('id', whereIn: uids).get();
-    }
-    return skillsList;
-  }
+  // Future<List<Skill>> getSkillsByUids(List<String> uids) async {
+  //   var skillsList = <Skill>[];
+  //   if (uids.isNotEmpty) {
+  //     var snapshot = await skills.where('id', whereIn: uids).get();
+  //   }
+  //   return skillsList;
+  // }
 
   Future<Iterable<Skill>> getSkillForAutocomplete(
       String pattern, SkillType type) async {
@@ -81,5 +88,34 @@ class StorageController {
   Future<Skill> getSkillByUid(String uid) async {
     var document = await skills.doc(uid).get();
     return document.data()!;
+  }
+
+  Future<String> addLike(String from, String skillId) async {
+    DocumentReference<Like> collectionReference =
+        await likes.add(Like(from, skillId));
+    return collectionReference.id;
+  }
+
+  Future<bool> isLiked(List<String> likesIds, String personId) async {
+    if (likesIds.isEmpty) {
+      return false;
+    } else {
+      var data = await likes.where('from', isEqualTo: personId).get();
+      bool isMatch = false;
+      for (var element in data.docs) {
+        isMatch = likesIds.contains(element.id);
+      }
+      return isMatch;
+    }
+  }
+
+  Future<String?> deleteLike(List<String> likesIds, String personId) async {
+    var data = await likes.where('from', isEqualTo: personId).get();
+    var snapshot =
+        data.docs.firstWhere((element) => likesIds.contains(element.id));
+    String? id;
+    id = snapshot.id;
+    await snapshot.reference.delete();
+    return id;
   }
 }

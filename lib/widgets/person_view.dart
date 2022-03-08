@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:team_skills/Model/person.dart';
+import 'package:team_skills/shared_functions.dart';
 import 'package:team_skills/storage_controller.dart';
 
 import '../Model/skill.dart';
@@ -18,8 +19,9 @@ class _PersonViewState extends State<PersonView> {
 
   bool likeSaving = false;
 
-  Future<Map<Skill, int>> richSkills(Map<String, int>? skills) async {
-    Map<Skill, int> richedSkills = {};
+  Future<Map<Skill, List<String>>> richSkills(
+      Map<String, List<String>>? skills) async {
+    Map<Skill, List<String>> richedSkills = {};
 
     skills != null
         ? richedSkills = {
@@ -56,7 +58,8 @@ class _PersonViewState extends State<PersonView> {
             const Divider(),
             FutureBuilder(
               future: richSkills(widget.person.skills),
-              builder: (context, AsyncSnapshot<Map<Skill, int>> snapshot) {
+              builder:
+                  (context, AsyncSnapshot<Map<Skill, List<String>>> snapshot) {
                 if (snapshot.hasError) {
                   return Text(
                       "Error loading skills ${snapshot.error.toString()}");
@@ -74,10 +77,11 @@ class _PersonViewState extends State<PersonView> {
                       shrinkWrap: true,
                       itemCount: sortedTypes.length,
                       itemBuilder: (context, index) {
-                        var singleTypeSkills = Map<Skill, int>.fromEntries(
-                            snapshot.data!.entries.where((element) =>
-                                element.key.type ==
-                                sortedTypes.elementAt(index)));
+                        var singleTypeSkills =
+                            Map<Skill, List<String>>.fromEntries(
+                                snapshot.data!.entries.where((element) =>
+                                    element.key.type ==
+                                    sortedTypes.elementAt(index)));
                         return Container(
                           padding: const EdgeInsets.all(10),
                           child: Column(
@@ -118,8 +122,27 @@ class _PersonViewState extends State<PersonView> {
                                             likeSaving
                                                 ? const CircularProgressIndicator()
                                                 : IconButton(
-                                                    icon: const Icon(
-                                                      Icons.thumb_up,
+                                                    icon: FutureBuilder(
+                                                      future: storageController
+                                                          .isLiked(
+                                                              singleTypeSkills[
+                                                                  key]!,
+                                                              SharedFunctions
+                                                                  .getCurrentUserId()),
+                                                      builder: (BuildContext
+                                                              context,
+                                                          AsyncSnapshot<bool>
+                                                              snapshot) {
+                                                        if (snapshot.hasData) {
+                                                          return snapshot.data!
+                                                              ? const Icon(Icons
+                                                                  .thumb_up)
+                                                              : const Icon(Icons
+                                                                  .thumb_up_outlined);
+                                                        } else {
+                                                          return const CircularProgressIndicator();
+                                                        }
+                                                      },
                                                     ),
                                                     iconSize: 18,
                                                     splashRadius: 20,
@@ -128,21 +151,53 @@ class _PersonViewState extends State<PersonView> {
                                                     padding: const EdgeInsets
                                                         .fromLTRB(5, 10, 5, 10),
                                                     onPressed: () async {
-                                                      widget.person.skills![
-                                                              await storageController
-                                                                  .getSkillId(
-                                                                      key.name,
-                                                                      key.type)] =
-                                                          singleTypeSkills[
-                                                                  key]! +
-                                                              1;
-                                                      await storageController
-                                                          .updatePerson(
-                                                              widget.person);
+                                                      if (await storageController
+                                                          .isLiked(
+                                                              singleTypeSkills[
+                                                                  key]!,
+                                                              SharedFunctions
+                                                                  .getCurrentUserId())) {
+                                                        var skillId =
+                                                            await storageController
+                                                                .getSkillId(
+                                                                    key.name,
+                                                                    key.type);
+                                                        var likeId = await storageController
+                                                            .deleteLike(
+                                                                singleTypeSkills[
+                                                                    key]!,
+                                                                SharedFunctions
+                                                                    .getCurrentUserId());
+                                                        widget.person
+                                                            .skills![skillId]
+                                                            ?.remove(likeId);
+                                                        await storageController
+                                                            .updatePerson(
+                                                                widget.person);
+                                                      } else {
+                                                        var skillId =
+                                                            await storageController
+                                                                .getSkillId(
+                                                                    key.name,
+                                                                    key.type);
+                                                        var likeId =
+                                                            await storageController
+                                                                .addLike(
+                                                                    SharedFunctions
+                                                                        .getCurrentUserId(),
+                                                                    skillId);
+                                                        widget.person
+                                                            .skills![skillId]
+                                                            ?.add(likeId);
+                                                        //singleTypeSkills[key]!.add(likeId);
+                                                        await storageController
+                                                            .updatePerson(
+                                                                widget.person);
+                                                      }
                                                     },
                                                   ),
                                             Text(
-                                                "  ${singleTypeSkills[key].toString()}"),
+                                                "  ${singleTypeSkills[key]?.length}"),
                                           ],
                                         ),
                                       ],

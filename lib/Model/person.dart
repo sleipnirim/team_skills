@@ -14,7 +14,7 @@ class Person {
   final String uid;
   String name;
   String surname;
-  Map<String, int>? skills;
+  Map<String, List<String>>? skills;
 
   factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
 
