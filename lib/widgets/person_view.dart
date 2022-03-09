@@ -98,8 +98,9 @@ class _PersonViewState extends State<PersonView> {
                                 //scrollDirection: Axis.vertical,
                                 itemCount: singleTypeSkills.length,
                                 itemBuilder: ((context, index) {
-                                  Skill key =
-                                      singleTypeSkills.keys.elementAt(index);
+                                  List keys = singleTypeSkills.keys.toList();
+                                  keys.sort((a, b) => a.name.compareTo(b.name));
+                                  Skill key = keys.elementAt(index);
                                   return Padding(
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 10),
