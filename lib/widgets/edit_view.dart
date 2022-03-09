@@ -33,6 +33,8 @@ class _EditViewState extends State<EditView> {
   var chipAddInProgress = <SkillType, bool>{};
   var chipTextEditingController = <SkillType, TextEditingController>{};
 
+  var errorText = "";
+
   bool isDataLoaded = false;
 
   @override
@@ -99,6 +101,10 @@ class _EditViewState extends State<EditView> {
                       ),
                     ),
                   ),
+                  Text(
+                    errorText,
+                    style: const TextStyle(color: Colors.red),
+                  ),
                   EditArea(
                     name: 'name',
                     textEditingController: nameTextEditingController,
@@ -147,21 +153,30 @@ class _EditViewState extends State<EditView> {
                             addChipAreaVisible[type] = true;
                           });
                         } else {
-                          setState(() {
-                            chipAddInProgress[type] = true;
-                          });
-                          var skillUid = await storageController.getSkillId(
-                              chipTextEditingController[type]!.text, type);
-                          setState(() {
-                            skills.add(Skill(
-                                name: chipTextEditingController[type]!.text,
-                                type: type));
-                            skillsUids.add(skillUid);
-                            person?.skills![skillUid] = [];
-                            chipAddInProgress[type] = false;
-                            addChipAreaVisible[type] = false;
-                            chipTextEditingController[type]!.clear();
-                          });
+                          if (chipTextEditingController[type]!
+                              .text
+                              .trim()
+                              .isNotEmpty) {
+                            setState(() {
+                              chipAddInProgress[type] = true;
+                            });
+                            var skillUid = await storageController.getSkillId(
+                                chipTextEditingController[type]!.text, type);
+                            setState(() {
+                              skills.add(Skill(
+                                  name: chipTextEditingController[type]!.text,
+                                  type: type));
+                              skillsUids.add(skillUid);
+                              person?.skills![skillUid] = [];
+                              chipAddInProgress[type] = false;
+                              addChipAreaVisible[type] = false;
+                              chipTextEditingController[type]!.clear();
+                            });
+                          } else {
+                            setState(() {
+                              errorText = "Skill name can't be empty";
+                            });
+                          }
                         }
                       },
                     ),
@@ -172,22 +187,34 @@ class _EditViewState extends State<EditView> {
                           setState(() {
                             savingPersonInProgress = true;
                           });
-                          if (person != null) {
-                            person!.name = nameTextEditingController.text;
-                            person!.surname = surnameTextEditingController.text;
-                            await storageController.updatePerson(person!);
+                          if (nameTextEditingController.text
+                                  .trim()
+                                  .isNotEmpty &&
+                              surnameTextEditingController.text
+                                  .trim()
+                                  .isNotEmpty) {
+                            if (person != null) {
+                              person!.name = nameTextEditingController.text;
+                              person!.surname =
+                                  surnameTextEditingController.text;
+                              await storageController.updatePerson(person!);
+                            } else {
+                              await storageController.addPerson(
+                                Person(
+                                  uid: authController.auth.currentUser!.uid,
+                                  name: nameTextEditingController.text,
+                                  surname: surnameTextEditingController.text,
+                                  skills: {for (var uid in skillsUids) uid: []},
+                                ),
+                              );
+                            }
+                            Navigator.pushReplacementNamed(
+                                context, PersonScreen.id);
                           } else {
-                            await storageController.addPerson(
-                              Person(
-                                uid: authController.auth.currentUser!.uid,
-                                name: nameTextEditingController.text,
-                                surname: surnameTextEditingController.text,
-                                skills: {for (var uid in skillsUids) uid: []},
-                              ),
-                            );
+                            setState(() {
+                              errorText = "Name or surname can't be empty";
+                            });
                           }
-                          Navigator.pushReplacementNamed(
-                              context, PersonScreen.id);
                           setState(() {
                             savingPersonInProgress = false;
                           });
