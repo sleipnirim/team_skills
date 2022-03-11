@@ -35,12 +35,16 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              const Flexible(
+              const Center(
                 child: Hero(
                   tag: 'logo',
                   child: SizedBox(
                     height: 200.0,
-                    child: Text('TeamSkills'),
+                    child: Text(
+                      'TeamSkills',
+                      style:
+                          TextStyle(fontSize: 70, fontWeight: FontWeight.w100),
+                    ),
                   ),
                 ),
               ),

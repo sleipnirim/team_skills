@@ -24,15 +24,9 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
     }
 
     throw UnsupportedError(
@@ -56,5 +50,25 @@ class DefaultFirebaseOptions {
     messagingSenderId: '653707740198',
     projectId: 'teamskills-d44d3',
     storageBucket: 'teamskills-d44d3.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyA8GRyvMJ3rOxdPn5-pCjAGTsY-0kURXxg',
+    appId: '1:653707740198:ios:89eca29684538942fa12e7',
+    messagingSenderId: '653707740198',
+    projectId: 'teamskills-d44d3',
+    storageBucket: 'teamskills-d44d3.appspot.com',
+    iosClientId: '653707740198-1f9mfcru12cm06d7uigqm75gqu964n4v.apps.googleusercontent.com',
+    iosBundleId: 'by.vzhukovskii.teamskills',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyA8GRyvMJ3rOxdPn5-pCjAGTsY-0kURXxg',
+    appId: '1:653707740198:ios:27698759d72a08b8fa12e7',
+    messagingSenderId: '653707740198',
+    projectId: 'teamskills-d44d3',
+    storageBucket: 'teamskills-d44d3.appspot.com',
+    iosClientId: '653707740198-2ed1m1rugbt0b48md5gsaudi6vj2a25f.apps.googleusercontent.com',
+    iosBundleId: 'by.vzhukovskii.teamskillsmac',
   );
 }
