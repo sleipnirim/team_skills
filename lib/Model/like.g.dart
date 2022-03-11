@@ -7,8 +7,8 @@ part of 'like.dart';
 // **************************************************************************
 
 Like _$LikeFromJson(Map<String, dynamic> json) => Like(
-      json['from'] as String,
-      json['toSkill'] as String,
+      from: json['from'] as String,
+      toSkill: json['toSkill'] as String,
     );
 
 Map<String, dynamic> _$LikeToJson(Like instance) => <String, dynamic>{

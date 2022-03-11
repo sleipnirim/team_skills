@@ -92,7 +92,7 @@ class StorageController {
 
   Future<String> addLike(String from, String skillId) async {
     DocumentReference<Like> collectionReference =
-        await likes.add(Like(from, skillId));
+        await likes.add(Like(from: from, toSkill: skillId));
     return collectionReference.id;
   }
 

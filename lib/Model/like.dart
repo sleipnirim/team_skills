@@ -7,7 +7,7 @@ class Like {
   final String from;
   final String toSkill;
 
-  Like(this.from, this.toSkill);
+  Like({required this.from, required this.toSkill});
 
   factory Like.fromJson(Map<String, dynamic> json) => _$LikeFromJson(json);
 
