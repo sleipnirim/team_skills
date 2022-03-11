@@ -42,40 +42,41 @@ class PersonScreen extends StatelessWidget {
     // than having to individually change instances of widgets.
 
     return Scaffold(
-        appBar: AppBar(
-          // Here we take the value from the MyHomePage object that was created by
-          // the App.build method, and use it to set our appbar title.
-          title: Text(title),
-          actions: SharedFunctions.appBarLoginActions(
-              context, authController.auth.currentUser!),
-        ),
-        body: StreamBuilder(
-          stream: storageController.persons.snapshots(),
-          builder: (BuildContext context,
-              AsyncSnapshot<QuerySnapshot<Person>> snapshot) {
-            if (snapshot.hasData) {
-              return MasonryGridView.count(
-                itemCount: snapshot.data!.size,
-                crossAxisCount: MediaQuery.of(context).size.width > 1200
-                    ? 3
-                    : MediaQuery.of(context).size.width > 800
-                        ? 2
-                        : 1,
-                shrinkWrap: true,
-                itemBuilder: (BuildContext context, int index) {
-                  return PersonView(person: snapshot.data!.docs[index].data());
-                },
-              );
-            } else if (snapshot.hasError) {
-              return const Center(
-                child: Text('Error loading persons'),
-              );
-            } else {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-          },
-        ));
+      appBar: AppBar(
+        // Here we take the value from the MyHomePage object that was created by
+        // the App.build method, and use it to set our appbar title.
+        title: Text(title),
+        actions: SharedFunctions.appBarLoginActions(
+            context, authController.auth.currentUser!),
+      ),
+      body: StreamBuilder(
+        stream: storageController.persons.snapshots(),
+        builder: (BuildContext context,
+            AsyncSnapshot<QuerySnapshot<Person>> snapshot) {
+          if (snapshot.hasData) {
+            return MasonryGridView.count(
+              itemCount: snapshot.data!.size,
+              crossAxisCount: MediaQuery.of(context).size.width > 1200
+                  ? 3
+                  : MediaQuery.of(context).size.width > 800
+                      ? 2
+                      : 1,
+              shrinkWrap: true,
+              itemBuilder: (BuildContext context, int index) {
+                return PersonView(person: snapshot.data!.docs[index].data());
+              },
+            );
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text('Error loading persons'),
+            );
+          } else {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+        },
+      ),
+    );
   }
 }

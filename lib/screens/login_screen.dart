@@ -1,16 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_signin_button/button_list.dart';
-import 'package:flutter_signin_button/button_view.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:team_skills/auth_controller.dart';
-import 'package:team_skills/screens/edit_screen.dart';
 import 'package:team_skills/screens/persons_screen.dart';
 import 'package:team_skills/screens/registration_screen.dart';
 import 'package:team_skills/storage_controller.dart';
 
 import '../constraints.dart';
+import 'edit_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   static String id = 'login_screen';
@@ -43,10 +40,10 @@ class _LoginScreenState extends State<LoginScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Flexible(
+              const Flexible(
                 child: Hero(
                   tag: 'logo',
-                  child: Container(
+                  child: SizedBox(
                     height: 200.0,
                     child: Text("TeamSkills"),
                   ),
@@ -72,7 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: kInputTextDecoration.copyWith(
                             hintText: 'Enter your email'),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 8.0,
                       ),
                       TextField(
@@ -84,7 +81,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         decoration: kInputTextDecoration.copyWith(
                             hintText: 'Enter your password'),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         height: 24.0,
                       ),
                       Padding(
@@ -95,55 +92,39 @@ class _LoginScreenState extends State<LoginScreen> {
                             setState(() {
                               saving = true;
                             });
-                            try {
-                              await authController.auth
-                                  .signInWithEmailAndPassword(
-                                      email: email, password: password);
-                              Navigator.pushReplacementNamed(
-                                  context, PersonScreen.id);
+                            if (email.contains('@a1.by')) {
+                              try {
+                                var userCredentials = await authController.auth
+                                    .signInWithEmailAndPassword(
+                                        email: email, password: password);
+                                if (userCredentials.user != null) {
+                                  if (await storageController
+                                      .checkIfPersonExists(
+                                          userCredentials.user!.uid)) {
+                                    Navigator.pushReplacementNamed(
+                                        context, PersonScreen.id);
+                                  } else {
+                                    Future.delayed(Duration.zero, () {
+                                      Navigator.pushReplacementNamed(
+                                          context, EditScreen.id);
+                                    });
+                                  }
+                                }
+                              } on FirebaseAuthException catch (e) {
+                                setState(() {
+                                  errorInfo = e.message;
+                                  saving = false;
+                                });
+                              }
+                            } else {
                               setState(() {
                                 saving = false;
-                              });
-                            } on FirebaseAuthException catch (e) {
-                              setState(() {
-                                errorInfo = e.message;
-                                saving = false;
+                                errorInfo = "Email must be in company domain";
                               });
                             }
                           },
                           child: const Text('Login'),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child:
-                            SignInButton(Buttons.Google, onPressed: () async {
-                          setState(() {
-                            saving = true;
-                          });
-                          var googleProvider =
-                              authController.googleAuthProvider;
-
-                          UserCredential credentials = await authController.auth
-                              .signInWithPopup(googleProvider);
-                          if (credentials.user != null) {
-                            if (await storageController
-                                .checkIfPersonExists(credentials.user!.uid)) {
-                              Navigator.pushReplacementNamed(
-                                  context, PersonScreen.id);
-                            } else {
-                              Future.delayed(Duration.zero, () {
-                                Navigator.pushReplacementNamed(
-                                    context, EditScreen.id);
-                              });
-                            }
-                          } else {
-                            setState(() {
-                              saving = false;
-                              errorInfo = "Error signing with Google";
-                            });
-                          }
-                        }),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),

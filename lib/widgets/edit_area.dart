@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class EditArea extends StatelessWidget {
-  EditArea({Key? key, required this.name, required this.textEditingController})
+  const EditArea(
+      {Key? key, required this.name, required this.textEditingController})
       : super(key: key);
 
   final String name;

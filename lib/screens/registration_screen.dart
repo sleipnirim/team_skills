@@ -51,7 +51,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     children: [
                       SizedBox(
                         height: 48.0,
-                        child: Text(errorText ?? ''),
+                        child: Text(
+                          errorText ?? '',
+                          style: const TextStyle(color: Colors.red),
+                        ),
                       ),
                       TextField(
                         keyboardType: TextInputType.emailAddress,
@@ -81,24 +84,31 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       ),
                       ElevatedButton(
                         onPressed: () async {
-                          try {
-                            await authController.auth
-                                .createUserWithEmailAndPassword(
-                                    email: email, password: password);
-                            setState(() {
-                              saving = true;
-                            });
-                            Future.delayed(Duration.zero, () {
-                              Navigator.pushReplacementNamed(
-                                  context, EditScreen.id);
-                            });
+                          if (email.contains('@a1.by')) {
+                            try {
+                              await authController.auth
+                                  .createUserWithEmailAndPassword(
+                                      email: email, password: password);
+                              setState(() {
+                                saving = true;
+                              });
+                              Future.delayed(Duration.zero, () {
+                                Navigator.pushReplacementNamed(
+                                    context, EditScreen.id);
+                              });
+                              setState(() {
+                                saving = false;
+                              });
+                            } on FirebaseAuthException catch (e) {
+                              setState(() {
+                                errorText = e.message;
+                                saving = false;
+                              });
+                            }
+                          } else {
                             setState(() {
                               saving = false;
-                            });
-                          } on FirebaseAuthException catch (e) {
-                            setState(() {
-                              errorText = e.message;
-                              saving = false;
+                              errorText = "Email must be in company domain";
                             });
                           }
                         },

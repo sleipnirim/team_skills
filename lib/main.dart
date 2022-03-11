@@ -14,7 +14,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
+  //await FirebaseAuth.instance.setPersistence(Persistence.LOCAL);
   await FirebaseAuth.instance.authStateChanges().first;
   runApp(MyApp());
 }
