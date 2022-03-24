@@ -212,6 +212,7 @@ class _PersonViewState extends State<PersonView> {
                       },
                     );
                   }
+                  return const Text('No skills');
                 }
                 return const CircularProgressIndicator();
               },
