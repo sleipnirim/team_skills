@@ -20,12 +20,46 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final authController = AuthController();
-  late String email;
-  late String password;
+  String email = "";
+  String password = "";
   String? errorInfo;
   bool saving = false;
+  bool passwordValidated = false;
 
   StorageController storageController = StorageController();
+
+  Future<void> login() async {
+    setState(() {
+      saving = true;
+    });
+
+    if (password.isNotEmpty) {
+      try {
+        var userCredentials = await authController.auth
+            .signInWithEmailAndPassword(email: email, password: password);
+        if (userCredentials.user != null) {
+          if (await storageController
+              .checkIfPersonExists(userCredentials.user!.uid)) {
+            Navigator.pushReplacementNamed(context, PersonScreen.id);
+          } else {
+            Future.delayed(Duration.zero, () {
+              Navigator.pushReplacementNamed(context, EditScreen.id);
+            });
+          }
+        }
+      } on FirebaseAuthException catch (e) {
+        setState(() {
+          errorInfo = e.message;
+          saving = false;
+        });
+      }
+    } else {
+      setState(() {
+        saving = false;
+        errorInfo = "Password must be filled";
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,84 +94,64 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(
-                        height: 48.0,
-                        child: Text(errorInfo ?? ""),
-                      ),
-                      TextField(
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) {
-                          email = value;
-                        },
-                        decoration: kInputTextDecoration.copyWith(
-                            hintText: 'Enter your email'),
-                      ),
-                      const SizedBox(
-                        height: 8.0,
-                      ),
-                      TextField(
-                        textAlign: TextAlign.center,
-                        obscureText: true,
-                        onChanged: (value) {
-                          password = value;
-                        },
-                        decoration: kInputTextDecoration.copyWith(
-                            hintText: 'Enter your password'),
-                      ),
-                      const SizedBox(
-                        height: 24.0,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                          style: ElevatedButtonTheme.of(context).style,
-                          onPressed: () async {
-                            setState(() {
-                              saving = true;
-                            });
-                            if (email.contains('@a1.by')) {
-                              try {
-                                var userCredentials = await authController.auth
-                                    .signInWithEmailAndPassword(
-                                        email: email, password: password);
-                                if (userCredentials.user != null) {
-                                  if (await storageController
-                                      .checkIfPersonExists(
-                                          userCredentials.user!.uid)) {
-                                    Navigator.pushReplacementNamed(
-                                        context, PersonScreen.id);
-                                  } else {
-                                    Future.delayed(Duration.zero, () {
-                                      Navigator.pushReplacementNamed(
-                                          context, EditScreen.id);
-                                    });
-                                  }
-                                }
-                              } on FirebaseAuthException catch (e) {
-                                setState(() {
-                                  errorInfo = e.message;
-                                  saving = false;
-                                });
-                              }
-                            } else {
-                              setState(() {
-                                saving = false;
-                                errorInfo = "Email must be in company domain";
-                              });
-                            }
-                          },
-                          child: const Text('Login'),
+                      AutofillGroup(
+                        child: Column(
+                          children: [
+                            SizedBox(
+                              height: 48.0,
+                              child: Text(errorInfo ?? ""),
+                            ),
+                            TextFormField(
+                              textAlign: TextAlign.center,
+                              keyboardType: TextInputType.emailAddress,
+                              autofillHints: const [AutofillHints.email],
+                              onChanged: (value) {
+                                email = value;
+                              },
+                              onFieldSubmitted: (value) {
+                                login();
+                              },
+                              decoration: kInputTextDecoration.copyWith(
+                                  hintText: 'Enter your email'),
+                            ),
+                            const SizedBox(
+                              height: 8.0,
+                            ),
+                            TextFormField(
+                              textAlign: TextAlign.center,
+                              obscureText: true,
+                              autofillHints: const [AutofillHints.password],
+                              onChanged: (value) {
+                                password = value;
+                              },
+                              onFieldSubmitted: (value) {
+                                login();
+                              },
+                              decoration: kInputTextDecoration.copyWith(
+                                  hintText: 'Enter your password'),
+                            ),
+                            const SizedBox(
+                              height: 24.0,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                style: ElevatedButtonTheme.of(context).style,
+                                onPressed: login,
+                                child: const Text('Login'),
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(
+                                        context, RegistrationScreen.id);
+                                  },
+                                  child: const Text("Register")),
+                            ),
+                          ],
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.pushNamed(
-                                  context, RegistrationScreen.id);
-                            },
-                            child: const Text("Register")),
                       ),
                     ],
                   ),

@@ -60,11 +60,19 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                           style: const TextStyle(color: Colors.red),
                         ),
                       ),
-                      TextField(
+                      TextFormField(
                         keyboardType: TextInputType.emailAddress,
                         textAlign: TextAlign.center,
                         onChanged: (value) {
                           email = value;
+                        },
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        autofillHints: const [AutofillHints.email],
+                        validator: (value) {
+                          if (value != null && !value.endsWith('@a1.by')) {
+                            return "Email must be in company domain";
+                          }
+                          return null;
                         },
                         decoration: kInputTextDecoration.copyWith(
                           hintText: 'Enter your email',
@@ -73,9 +81,20 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       const SizedBox(
                         height: 8.0,
                       ),
-                      TextField(
+                      TextFormField(
                         obscureText: true,
                         textAlign: TextAlign.center,
+                        autofillHints: const [AutofillHints.password],
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        validator: (value) {
+                          var pattern =
+                              r"^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$";
+                          RegExp regex = RegExp(pattern);
+                          if (value != null && !regex.hasMatch(value)) {
+                            return "Password must be minimum eight characters, at least one letter and one number";
+                          }
+                          return null;
+                        },
                         onChanged: (value) {
                           password = value;
                         },

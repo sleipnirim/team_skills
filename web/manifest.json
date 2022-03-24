@@ -1,11 +1,11 @@
 {
-    "name": "team_skills",
-    "short_name": "team_skills",
+    "name": "TeamSkills",
+    "short_name": "TS",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "TeamSkills board",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
