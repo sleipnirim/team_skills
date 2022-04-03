@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:team_skills/Model/person.dart';
 import 'package:team_skills/shared_functions.dart';
 import 'package:team_skills/storage_controller.dart';
@@ -19,14 +21,14 @@ class _PersonViewState extends State<PersonView> {
 
   bool likeSaving = false;
 
-  Future<Map<Skill, List<String>>> richSkills(
-      Map<String, List<String>>? skills) async {
-    Map<Skill, List<String>> richedSkills = {};
+  Future<Map<Skill, SkillHolder>> richSkills(List<SkillHolder>? skills) async {
+    Map<Skill, SkillHolder> richedSkills = {};
 
     skills != null
         ? richedSkills = {
-            for (String skill in skills.keys)
-              await storageController.getSkillByUid(skill): skills[skill]!
+            for (String skillId in skills.map((e) => e.skillId).toList())
+              await storageController.getSkillByUid(skillId):
+                  skills.firstWhere((element) => element.skillId == skillId)
           }
         : richedSkills = {};
 
@@ -59,7 +61,7 @@ class _PersonViewState extends State<PersonView> {
             FutureBuilder(
               future: richSkills(widget.person.skills),
               builder:
-                  (context, AsyncSnapshot<Map<Skill, List<String>>> snapshot) {
+                  (context, AsyncSnapshot<Map<Skill, SkillHolder>> snapshot) {
                 if (snapshot.hasError) {
                   return Text(
                       "Error loading skills ${snapshot.error.toString()}");
@@ -78,7 +80,7 @@ class _PersonViewState extends State<PersonView> {
                       itemCount: sortedTypes.length,
                       itemBuilder: (context, index) {
                         var singleTypeSkills =
-                            Map<Skill, List<String>>.fromEntries(
+                            Map<Skill, SkillHolder>.fromEntries(
                                 snapshot.data!.entries.where((element) =>
                                     element.key.type ==
                                     sortedTypes.elementAt(index)));
@@ -110,11 +112,48 @@ class _PersonViewState extends State<PersonView> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                          key.name,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              key.name,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              overflow: TextOverflow.clip,
+                                            ),
+                                            const SizedBox(
+                                              width: 10,
+                                            ),
+                                            RatingBar.builder(
+                                              itemCount: 3,
+                                              itemPadding:
+                                                  const EdgeInsets.all(1),
+                                              initialRating:
+                                                  singleTypeSkills[key]
+                                                          ?.rating
+                                                          .toDouble() ??
+                                                      0,
+                                              itemSize: 15,
+                                              itemBuilder:
+                                                  (context, position) => Stack(
+                                                alignment: Alignment.center,
+                                                children: const [
+                                                  FaIcon(
+                                                    FontAwesomeIcons.diamond,
+                                                    color: Colors.black,
+                                                    size: 20,
+                                                  ),
+                                                  FaIcon(
+                                                    FontAwesomeIcons.diamond,
+                                                    color: Colors.redAccent,
+                                                    size: 12,
+                                                  ),
+                                                ],
+                                              ),
+                                              onRatingUpdate: (double value) {},
+                                              ignoreGestures: true,
+                                            )
+                                          ],
                                         ),
                                         Row(
                                           mainAxisAlignment:
@@ -127,7 +166,8 @@ class _PersonViewState extends State<PersonView> {
                                                       future: storageController
                                                           .isLiked(
                                                               singleTypeSkills[
-                                                                  key]!,
+                                                                      key]
+                                                                  ?.likes,
                                                               SharedFunctions
                                                                   .getCurrentUserId()),
                                                       builder: (BuildContext
@@ -155,7 +195,8 @@ class _PersonViewState extends State<PersonView> {
                                                       if (await storageController
                                                           .isLiked(
                                                               singleTypeSkills[
-                                                                  key]!,
+                                                                      key]
+                                                                  ?.likes,
                                                               SharedFunctions
                                                                   .getCurrentUserId())) {
                                                         var skillId =
@@ -166,12 +207,18 @@ class _PersonViewState extends State<PersonView> {
                                                         var likeId = await storageController
                                                             .deleteLike(
                                                                 singleTypeSkills[
-                                                                    key]!,
+                                                                        key]
+                                                                    ?.likes,
                                                                 SharedFunctions
                                                                     .getCurrentUserId());
-                                                        widget.person
-                                                            .skills![skillId]
-                                                            ?.remove(likeId);
+                                                        widget.person.skills!
+                                                            .firstWhere(
+                                                                (element) =>
+                                                                    element
+                                                                        .skillId ==
+                                                                    skillId)
+                                                            .likes
+                                                            .remove(likeId);
                                                         await storageController
                                                             .updatePerson(
                                                                 widget.person);
@@ -187,10 +234,14 @@ class _PersonViewState extends State<PersonView> {
                                                                     SharedFunctions
                                                                         .getCurrentUserId(),
                                                                     skillId);
-                                                        widget.person
-                                                            .skills![skillId]
-                                                            ?.add(likeId);
-                                                        //singleTypeSkills[key]!.add(likeId);
+                                                        widget.person.skills
+                                                            ?.firstWhere(
+                                                                (element) =>
+                                                                    element
+                                                                        .skillId ==
+                                                                    skillId)
+                                                            .likes
+                                                            .add(likeId);
                                                         await storageController
                                                             .updatePerson(
                                                                 widget.person);
@@ -198,7 +249,7 @@ class _PersonViewState extends State<PersonView> {
                                                     },
                                                   ),
                                             Text(
-                                                "  ${singleTypeSkills[key]?.length}"),
+                                                "  ${singleTypeSkills[key]?.likes.length ?? "0"}"),
                                           ],
                                         ),
                                       ],

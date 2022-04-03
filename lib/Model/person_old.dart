@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'person.g.dart';
+part 'person_old.g.dart';
 
 @JsonSerializable()
 class Person {
@@ -14,23 +14,9 @@ class Person {
   final String uid;
   String name;
   String surname;
-  List<SkillHolder>? skills;
+  Map<String, List<String>>? skills;
 
   factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
 
   Map<String, dynamic> toJson() => _$PersonToJson(this);
-}
-
-@JsonSerializable()
-class SkillHolder {
-  SkillHolder({required this.skillId, this.rating = 0, this.likes = const []});
-
-  String skillId;
-  int rating;
-  List<String> likes;
-
-  factory SkillHolder.fromJson(Map<String, dynamic> json) =>
-      _$SkillHolderFromJson(json);
-
-  Map<String, dynamic> toJson() => _$SkillHolderToJson(this);
 }

@@ -21,11 +21,15 @@ class PersonScreen extends StatelessWidget {
   final authController = AuthController();
 
   Future<List<Widget>> personGridBuilder() async {
-    //final StorageController storageController = StorageController();
+    final StorageController storageController = StorageController();
 
     List<QueryDocumentSnapshot<Person>> document =
         await storageController.persons.get().then((snapshot) => snapshot.docs);
 
+    var personsList = List<Person>.empty(growable: true);
+    for (QueryDocumentSnapshot<Person> person in document) {
+      personsList.add(person.data());
+    }
     return List.generate(
         document.length,
         (index) => PersonView(
@@ -42,7 +46,6 @@ class PersonScreen extends StatelessWidget {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-
     return Scaffold(
       appBar: AppBar(
         // Here we take the value from the MyHomePage object that was created by

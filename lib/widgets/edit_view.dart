@@ -22,7 +22,7 @@ class _EditViewState extends State<EditView> {
   late TextEditingController nameTextEditingController;
   late TextEditingController surnameTextEditingController;
   List<String> skillsUids = [];
-  List<Skill> skills = [];
+  Map<Skill, SkillHolder?> skills = {};
   late AuthController authController;
   late StorageController storageController;
   Person? person;
@@ -58,9 +58,11 @@ class _EditViewState extends State<EditView> {
 
       if (await storageController.checkIfPersonExists(uid)) {
         person = await storageController.getPerson(uid);
-        skillsUids = person?.skills?.keys.toList() ?? [];
+        skillsUids = person?.skills?.map((e) => e.skillId).toList() ?? [];
         for (String uid in skillsUids) {
-          skills.add(await storageController.getSkillByUid(uid));
+          var skill = await storageController.getSkillByUid(uid);
+          skills[skill] =
+              person?.skills?.firstWhere((element) => element.skillId == uid);
         }
       }
       nameTextEditingController.text = person?.name ?? "";
@@ -82,7 +84,8 @@ class _EditViewState extends State<EditView> {
           );
         }
         return Center(
-          child: FittedBox(
+          child: UnconstrainedBox(
+            constrainedAxis: Axis.horizontal,
             child: Card(
               elevation: 20,
               child: Column(
@@ -116,21 +119,30 @@ class _EditViewState extends State<EditView> {
                   for (SkillType type in SkillType.values)
                     ChipsRow(
                       type: type,
-                      skills: skills
-                          .where((element) => element.type == type)
-                          .toList(),
+                      skills: Map.fromEntries(skills.entries
+                          .where((element) => element.key.type == type)),
                       onDeleted: (skill) async {
                         var uid = await storageController.getSkillId(
                             skill.name, skill.type);
                         setState(() {
                           skillsUids.remove(uid);
                           skills.remove(skill);
-                          person?.skills?.remove(uid);
+                          person?.skills?.removeWhere(
+                              (element) => element.skillId == uid);
                         });
                       },
                       addChipAreaVisible: addChipAreaVisible[type]!,
                       textEditingController: chipTextEditingController[type]!,
                       storageController: storageController,
+                      onRatingUpdate: (skill, rating) {
+                        setState(() {
+                          skills[skill]?.rating = rating as int;
+                          person?.skills
+                              ?.firstWhere((element) =>
+                                  element.skillId == skills[skill]?.skillId)
+                              .rating = rating as int;
+                        });
+                      },
                       onSuggestionSelected: (Skill skill) async {
                         setState(() {
                           chipAddInProgress[type] = true;
@@ -138,9 +150,9 @@ class _EditViewState extends State<EditView> {
                         var skillUid = await storageController.getSkillId(
                             skill.name, skill.type);
                         setState(() {
-                          skills.add(skill);
+                          skills[skill] = SkillHolder(skillId: skillUid);
                           skillsUids.add(skillUid);
-                          person?.skills?[skillUid] = [];
+                          person?.skills?.add(SkillHolder(skillId: skillUid));
                           chipAddInProgress[type] = false;
                           addChipAreaVisible[type] = false;
                           chipTextEditingController[type]!.clear();
@@ -163,11 +175,13 @@ class _EditViewState extends State<EditView> {
                             var skillUid = await storageController.getSkillId(
                                 chipTextEditingController[type]!.text, type);
                             setState(() {
-                              skills.add(Skill(
+                              skills[(Skill(
                                   name: chipTextEditingController[type]!.text,
-                                  type: type));
+                                  type:
+                                      type))] = SkillHolder(skillId: skillUid);
                               skillsUids.add(skillUid);
-                              person?.skills![skillUid] = [];
+                              person?.skills
+                                  ?.add(SkillHolder(skillId: skillUid));
                               chipAddInProgress[type] = false;
                               addChipAreaVisible[type] = false;
                               chipTextEditingController[type]!.clear();
@@ -204,7 +218,9 @@ class _EditViewState extends State<EditView> {
                                   uid: authController.auth.currentUser!.uid,
                                   name: nameTextEditingController.text,
                                   surname: surnameTextEditingController.text,
-                                  skills: {for (var uid in skillsUids) uid: []},
+                                  skills: skillsUids
+                                      .map((e) => SkillHolder(skillId: e))
+                                      .toList(),
                                 ),
                               );
                             }

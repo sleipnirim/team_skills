@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:team_skills/Model/like.dart';
+import 'package:team_skills/Model/person.dart';
 import 'package:team_skills/Model/skill.dart';
 
 import 'Model/person.dart';
@@ -96,8 +97,8 @@ class StorageController {
     return collectionReference.id;
   }
 
-  Future<bool> isLiked(List<String> likesIds, String personId) async {
-    if (likesIds.isEmpty) {
+  Future<bool> isLiked(List<String>? likesIds, String personId) async {
+    if (likesIds == null) {
       return false;
     } else {
       var data = await likes.where('from', isEqualTo: personId).get();
@@ -109,13 +110,41 @@ class StorageController {
     }
   }
 
-  Future<String?> deleteLike(List<String> likesIds, String personId) async {
+  Future<String?> deleteLike(List<String>? likesIds, String personId) async {
     var data = await likes.where('from', isEqualTo: personId).get();
-    var snapshot =
-        data.docs.firstWhere((element) => likesIds.contains(element.id));
+    var snapshot = data.docs
+        .firstWhere((element) => likesIds?.contains(element.id) ?? false);
     String? id;
     id = snapshot.id;
     await snapshot.reference.delete();
     return id;
   }
+
+  // Future<void> migration(List<Person> persons) async {
+  //   print('Migration called');
+  //   print(persons.toString());
+  //   var personsCollection = _firebaseFirestore
+  //       .collection('persons')
+  //       .withConverter<PersonNew>(
+  //           fromFirestore: ((snapshot, options) =>
+  //               PersonNew.fromJson(snapshot.data()!)),
+  //           toFirestore: (person, _) => person.toJson());
+  //
+  //   for (Person person in persons) {
+  //     PersonNew personNew = PersonNew(
+  //         uid: person.uid,
+  //         name: person.name,
+  //         surname: person.surname,
+  //         skills: person.skills != null
+  //             ? List.generate(
+  //                 person.skills!.length,
+  //                 (index) =>
+  //                     SkillHolder(skillId: person.skills!.keys.toList()[index]))
+  //             : null);
+  //     var querySnapshot =
+  //         await personsCollection.where('uid', isEqualTo: person.uid).get();
+  //     var personID = querySnapshot.docs[0].id;
+  //     await personsCollection.doc(personID).update(personNew.toJson());
+  //   }
+  // }
 }
